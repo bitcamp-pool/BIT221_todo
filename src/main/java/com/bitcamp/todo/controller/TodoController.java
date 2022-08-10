@@ -6,6 +6,7 @@ import com.bitcamp.todo.model.TodoEntity;
 import com.bitcamp.todo.service.TodoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,9 +23,11 @@ public class TodoController {
      * 생성 (Create Todo 구현)
      */
     @PostMapping
-    public ResponseEntity<?> createTodo(@RequestBody TodoDTO dto){
+    public ResponseEntity<?> createTodo(@AuthenticationPrincipal String userId,
+                                        @RequestBody TodoDTO dto){
+
         try {
-            String temporaryUserId = "temporary-user";
+//            String temporaryUserId = "temporary-user";
 
             // (1) TodoEntity 로 변환
             TodoEntity entity = TodoDTO.toEntity(dto);
@@ -32,8 +35,8 @@ public class TodoController {
             // (2) id를 null 로 초기화 한다. 생성 당시에는 id가 없어야 하기 때문
             entity.setId(null);
 
-            // (3) 임시 유저 아이를 설정해준다
-            entity.setUserId(temporaryUserId);
+            // (3) 임시 유저 아이디를 설정해준다
+            entity.setUserId(userId);
 
             // (4) 서비스를 이용해 엔티티를 생성한다.
             List<TodoEntity> entities = service.create(entity);
@@ -57,10 +60,10 @@ public class TodoController {
     /**조회(Retrieve Todo 구현)
      * */
     @GetMapping
-    public ResponseEntity<?> retrieveTodoList(){
-        String temporaryUserId = "temporary-user";
+    public ResponseEntity<?> retrieveTodoList(@AuthenticationPrincipal String userId){
+//        String temporaryUserId = "temporary-user";
 
-        List<TodoEntity> entities = service.retrieve(temporaryUserId);
+        List<TodoEntity> entities = service.retrieve(userId);
         List<TodoDTO> dtos = entities.stream().map(TodoDTO::new).collect(Collectors.toList());
         ResponseDTO<TodoDTO> response = ResponseDTO.<TodoDTO>builder().resList(dtos).build();
 
@@ -69,11 +72,12 @@ public class TodoController {
 
     /** 수정(Udate Todo 구현)*/
     @PutMapping
-    public ResponseEntity<?> updateTodo(@RequestBody TodoDTO dto){
-        String temporaryUserId = "temporary-user";
+    public ResponseEntity<?> updateTodo(@AuthenticationPrincipal String userId,
+                                        @RequestBody TodoDTO dto){
+//        String temporaryUserId = "temporary-user";
 
         TodoEntity entity = TodoDTO.toEntity(dto);
-        entity.setUserId(temporaryUserId);
+        entity.setUserId(userId);
         List<TodoEntity> entities = service.update(entity);
         List<TodoDTO> dtos = entities.stream().map(TodoDTO::new).collect(Collectors.toList());
         ResponseDTO<TodoDTO> response = ResponseDTO.<TodoDTO>builder().resList(dtos).build();
@@ -83,12 +87,13 @@ public class TodoController {
 
     /** 삭제 (DELETE)*/
     @DeleteMapping
-    public ResponseEntity<?> deleteTodo(@RequestBody TodoDTO dto){
+    public ResponseEntity<?> deleteTodo(@AuthenticationPrincipal String userId,
+                                        @RequestBody TodoDTO dto){
         try {
-            String temporaryUserId = "temporary-user";
+//            String temporaryUserId = "temporary-user";
 
             TodoEntity entity = TodoDTO.toEntity(dto);
-            entity.setUserId(temporaryUserId);
+            entity.setUserId(userId);
             List<TodoEntity> entities = service.delete(entity);
             List<TodoDTO> dtos = entities.stream().map(TodoDTO::new).collect(Collectors.toList());
             ResponseDTO<TodoDTO> response = ResponseDTO.<TodoDTO>builder().resList(dtos).build();
